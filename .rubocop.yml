@@ -1,0 +1,41 @@
+inherit_from:
+  - .hound-rubocop.yml
+
+AllCops:
+  TargetRubyVersion: 2.4
+  Exclude:
+    - bin/*
+Layout/DotPosition:
+  Description: Checks the position of the dot in multi-line method calls.
+  StyleGuide: https://github.com/bbatsov/ruby-style-guide#consistent-multi-line-chains
+  Enabled: true
+  EnforcedStyle: leading
+  SupportedStyles:
+  - leading
+  - trailing
+Metrics/BlockLength:
+  Enabled: false
+Style/AndOr:
+  Description: Use &&/|| instead of and/or.
+  StyleGuide: https://github.com/bbatsov/ruby-style-guide#no-and-or-or
+  Enabled: true
+  EnforcedStyle: conditionals
+  SupportedStyles:
+  - always
+  - conditionals
+Style/ClassAndModuleChildren:
+  Enabled: true
+  EnforcedStyle: nested
+  SupportedStyles:
+  - compact
+  - nested
+Style/MultilineIfModifier:
+  Enabled: false
+Style/StringLiterals:
+  Description: Checks if uses of quotes match the configured preference.
+  StyleGuide: https://github.com/bbatsov/ruby-style-guide#consistent-string-literals
+  Enabled: true
+  EnforcedStyle: single_quotes
+  SupportedStyles:
+  - single_quotes
+  - double_quotes
