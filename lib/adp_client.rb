@@ -120,21 +120,48 @@ class AdpClient
   end
 
   ##
-  # Get a resource
-  # Makes a request for a resource from ADP and returns the response as a
-  # raw {Hash}.
+  # Make a delete request.
+  # Makes a request to delete an existing resource from ADP.
   #
   # @param [String] the resource endpoint
-  # @return [Hash] response data
+  # @return [HTTParty::Response] the response
+  def delete(resource)
+    headers = base_headers.merge('Content-Type' => 'application/json')
+    url = "#{@base_url}/#{resource}"
+
+    @logger.debug("DELETE request Url: #{url}")
+    @logger.debug("-- Headers: #{headers}")
+
+    x = HTTParty.delete(url, headers: headers)
+    puts x.inspect
+    x
+  end
+
+  ##
+  # Make a get request
+  # Makes a request for a resource from ADP and returns the full response.
+  #
+  # @param [String] the resource endpoint
+  # @return [HTTParty::Response] the response
   def get(resource)
     url = "#{@base_url}/#{resource}"
 
     @logger.debug("GET request Url: #{url}")
     @logger.debug("-- Headers: #{base_headers}")
 
+    HTTParty.get(url, headers: base_headers)
+  end
+
+  ##
+  # Get a resource
+  # Makes a request for a resource from ADP and returns the response as a
+  # raw {Hash}.
+  #
+  # @param [String] the resource endpoint
+  # @return [Hash] response data
+  def get_resource(resource)
     raises_unless_success do
-      HTTParty
-        .get(url, headers: base_headers)
+      get(resource)
     end.parsed_response
   end
 
@@ -146,7 +173,7 @@ class AdpClient
   # @param [String] the resource endpoint
   # @param [Hash] the resource data
   # @return [Hash] response data
-  def post(resource, data)
+  def post_resource(resource, data)
     headers = base_headers
               .merge('Content-Type' => 'application/json')
     url = "#{@base_url}/#{resource}"

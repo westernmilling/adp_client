@@ -2,6 +2,7 @@
 
 require 'bundler/setup'
 require 'adp_client'
+require 'faker'
 require 'simplecov'
 
 SimpleCov.start
