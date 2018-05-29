@@ -232,9 +232,9 @@ class AdpClient
   class InvalidRequestHandler < BaseErrorHandler
     def error
       InvalidRequest.new(
-        format('%s: %s',
-               @httparty.parsed_response['error'],
-               @httparty.parsed_response['error_description'])
+        format('%<error>s: %<description>s',
+               error: @httparty.parsed_response['error'],
+               description: @httparty.parsed_response['error_description'])
       )
     end
 
@@ -265,9 +265,9 @@ class AdpClient
   class UnauthorizedHandler < BaseErrorHandler
     def error
       Unauthorized.new(
-        format('%s: %s',
-               @httparty.parsed_response['error'],
-               @httparty.parsed_response['error_description'])
+        format('%<error>s: %<description>s',
+               error: @httparty.parsed_response['error'],
+               description: @httparty.parsed_response['error_description'])
       )
     end
 
