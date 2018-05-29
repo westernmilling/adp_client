@@ -141,9 +141,141 @@ RSpec.describe AdpClient do
     end
   end
 
-  describe '#get' do
+  describe '#delete' do
     subject do
-      instance.get(event_path)
+      instance.delete(resource_path)
+    end
+
+    let(:message_id) { SecureRandom.uuid }
+    let(:resource_path) do
+      "core/v1/event-notification-messages/#{message_id}"
+    end
+
+    context 'when the resource exists' do
+      include_context 'valid token request'
+
+      let(:response) do
+        {
+          status: 200,
+          headers: {
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+            'Host' => URI.parse(base_url).host
+          },
+          body: response_hash.to_json
+        }
+      end
+      let(:response_hash) do
+        actor_associate_oid = Faker::Lorem.unique.characters(17).upcase
+        event_worker = {
+          associate_id: Faker::Lorem.unique.characters(9).upcase,
+          associate_oid: Faker::Lorem.unique.characters(17).upcase
+        }
+
+        {
+          'events' => [
+            'data' => {
+              'eventContext' => {
+                'worker' => {
+                  'associateOID' => event_worker[:associate_oid]
+                }
+              },
+              'output' => {
+                'worker' => {
+                  'associateOID' => event_worker[:associate_oid],
+                  'workerID' => { 'idValue' => event_worker[:associate_id] },
+                  'workerDates' => {
+                    'originalHireDate' => (Date.today - 1).iso8601,
+                    'terminationDate' => Date.today.iso8601
+                  },
+                  'workerStatus' => {
+                    'statusCode' => {
+                      'codeValue' => 'T',
+                      'shortName' => 'Terminated'
+                    },
+                    'reasonCode' => {
+                      'codeValue' => '1',
+                      'shortName' => 'Assignment Ended'
+                    },
+                    'effectiveDate' => Date.today.iso8601
+                  }
+                }
+              }
+            },
+            'eventID' => SecureRandom.uuid,
+            'serviceCategoryCode' => {
+              'codeValue' => 'HR'
+            },
+            'eventNameCode' => {
+              'codeValue' => 'worker.terminate'
+            },
+            'eventReasonCode' => {
+              'codeValue' => '1',
+              'shortName' => 'Assignment Ended'
+            },
+            'eventStatusCode' => {
+              'codeValue' => 'COMPLETED',
+              'shortName' => 'Completed'
+            },
+            'recordDateTime' => Time.now.iso8601,
+            'creationDateTime' => Time.now.iso8601,
+            'effectiveDateTime' => Time.now.iso8601,
+            'originator' => {
+              'associateOID' => actor_associate_oid
+            },
+            'actor' => {
+              'associateOID' => actor_associate_oid
+            },
+            'links' => []
+          ]
+        }
+      end
+
+      before do
+        stub_request(:delete, "#{base_url}/#{resource_path}")
+          .to_return(response)
+      end
+
+      # This test is testing deleting event-notification-messages which returns
+      # the event notifications that were deleted. Do the other endpoints
+      # exhibit the same behavior?
+      it 'returns the deleted resource' do
+        expect(subject).to have_attributes(
+          code: 200,
+          parsed_response: response_hash
+        )
+      end
+    end
+
+    context 'when the resource does not exist' do
+      include_context 'valid token request'
+
+      before do
+        stub_request(:delete, "#{base_url}/#{resource_path}")
+          .to_return(response)
+      end
+
+      let(:response) do
+        {
+          status: 404,
+          headers: {
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+            'Host' => URI.parse(base_url).host
+          },
+          body: nil
+        }
+      end
+
+      it 'returns status of 404' do
+        expect(subject).to have_attributes(code: 404)
+      end
+    end
+  end
+
+  describe '#get_resource' do
+    subject do
+      instance.get_resource(event_path)
     end
 
     let(:event_id) { SecureRandom.uuid }
@@ -293,9 +425,9 @@ RSpec.describe AdpClient do
     end
   end
 
-  describe '#post' do
+  describe '#post_resource' do
     subject do
-      instance.post(
+      instance.post_resource(
         resource_path,
         payload
       )
